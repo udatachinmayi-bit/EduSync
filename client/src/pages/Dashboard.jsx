@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
@@ -7,13 +7,35 @@ function Dashboard() {
 
   const navigate = useNavigate();
 
-  const user = JSON.parse(
-    localStorage.getItem("userInfo")
-  );
+  const [loading, setLoading] =
+    useState(false);
 
-  const [roomCode, setRoomCode] = useState("");
+  const [title, setTitle] =
+    useState("");
 
-  const [loading, setLoading] = useState(false);
+  const [description, setDescription] =
+    useState("");
+
+  const [user, setUser] =
+    useState(null);
+
+  /* Check Login */
+  useEffect(() => {
+
+    const storedUser = JSON.parse(
+      localStorage.getItem("userInfo")
+    );
+
+    if (!storedUser?.token) {
+
+      navigate("/login");
+      return;
+
+    }
+
+    setUser(storedUser);
+
+  }, [navigate]);
 
   /* Create Classroom */
   const createClassroom = async () => {
@@ -23,7 +45,7 @@ function Dashboard() {
       setLoading(true);
 
       toast.loading(
-        "Creating Premium Classroom...",
+        "Creating Classroom...",
         {
           id: "createRoom"
         }
@@ -33,10 +55,7 @@ function Dashboard() {
         localStorage.getItem("userInfo")
       );
 
-      if (
-        !storedUser ||
-        !storedUser.token
-      ) {
+      if (!storedUser?.token) {
 
         toast.dismiss("createRoom");
 
@@ -50,18 +69,26 @@ function Dashboard() {
 
       }
 
-   const response = await axios.post(
-  `${import.meta.env.VITE_API_URL}/api/classrooms/create`,
-  {
-    title,
-    description
-  },
-  {
-    headers: {
-      Authorization: `Bearer ${storedUser.token}`
-    }
-  }
-);
+      const response = await axios.post(
+
+        `${import.meta.env.VITE_API_URL}/api/classrooms/create`,
+
+        {
+          title,
+          description
+        },
+
+        {
+          headers: {
+            Authorization:
+              `Bearer ${storedUser.token}`,
+            "Content-Type":
+              "application/json"
+          }
+        }
+
+      );
+
       toast.dismiss("createRoom");
 
       toast.success(
@@ -91,283 +118,182 @@ function Dashboard() {
 
   };
 
-  /* Join Classroom */
-  const joinClassroom = () => {
-
-    if (!roomCode.trim()) {
-
-      toast.error("Enter Room Code");
-      return;
-
-    }
-
-    navigate(`/classroom/${roomCode}`);
-
-  };
-
-  /* Logout */
-  const logout = () => {
-
-    localStorage.removeItem("userInfo");
-
-    toast.success("Logged Out");
-
-    navigate("/login");
-
-  };
-
   return (
     <div
       style={{
         minHeight: "100vh",
         background:
-          "linear-gradient(135deg,#020617,#0f172a,#111827)",
-        color: "white",
-        position: "relative",
-        overflow: "hidden",
-        fontFamily: "Inter, sans-serif"
+          "linear-gradient(135deg,#020617,#0f172a,#1e293b)",
+        padding: "40px",
+        color: "white"
       }}
     >
 
-      {/* Navbar */}
-      <nav
+      {/* Top Section */}
+      <div
         style={{
           display: "flex",
-          justifyContent: "space-between",
+          justifyContent:
+            "space-between",
           alignItems: "center",
-          padding: "30px 60px"
+          marginBottom: "50px"
         }}
       >
 
-        <h1
-          style={{
-            fontSize: "42px",
-            fontWeight: "900",
-            color: "#38bdf8"
-          }}
-        >
-          EduSync
-        </h1>
+        <div>
+
+          <h1
+            style={{
+              fontSize: "48px",
+              fontWeight: "900",
+              marginBottom: "10px"
+            }}
+          >
+            EduSync Dashboard
+          </h1>
+
+          <p
+            style={{
+              color: "#94a3b8",
+              fontSize: "18px"
+            }}
+          >
+            Welcome back,
+            {" "}
+            {user?.name}
+          </p>
+
+        </div>
 
         <button
-          onClick={logout}
+          onClick={() => {
+
+            localStorage.removeItem(
+              "userInfo"
+            );
+
+            navigate("/login");
+
+          }}
           style={{
-            padding: "14px 28px",
-            border: "none",
-            borderRadius: "16px",
             background:
               "linear-gradient(135deg,#ef4444,#dc2626)",
+            border: "none",
+            padding:
+              "14px 26px",
+            borderRadius: "14px",
             color: "white",
+            fontSize: "16px",
             fontWeight: "700",
-            cursor: "pointer",
-            fontSize: "16px"
+            cursor: "pointer"
           }}
         >
           Logout
         </button>
 
-      </nav>
-
-      {/* Welcome */}
-      <div
-        style={{
-          textAlign: "center",
-          marginTop: "30px"
-        }}
-      >
-
-        <h1
-          style={{
-            fontSize: "68px",
-            fontWeight: "900"
-          }}
-        >
-          Welcome,
-          <span
-            style={{
-              color: "#38bdf8"
-            }}
-          >
-            {" "}{user?.name}
-          </span>
-        </h1>
-
-        <p
-          style={{
-            color: "#cbd5e1",
-            fontSize: "22px",
-            marginTop: "14px"
-          }}
-        >
-          Premium Virtual Classroom Dashboard
-        </p>
-
       </div>
 
-      {/* Cards */}
+      {/* Create Classroom Card */}
       <div
         style={{
-          display: "grid",
-          gridTemplateColumns:
-            "repeat(auto-fit,minmax(380px,1fr))",
-          gap: "40px",
-          padding: "80px 60px"
+          maxWidth: "700px",
+          margin: "auto",
+          background:
+            "rgba(15,23,42,0.8)",
+          backdropFilter:
+            "blur(20px)",
+          border:
+            "1px solid rgba(255,255,255,0.08)",
+          borderRadius: "28px",
+          padding: "40px",
+          boxShadow:
+            "0 20px 60px rgba(0,0,0,0.4)"
         }}
       >
 
-        {/* Create Classroom */}
-        <div
+        <h2
           style={{
-            background:
-              "rgba(255,255,255,0.06)",
-            border:
-              "1px solid rgba(255,255,255,0.1)",
-            borderRadius: "32px",
-            padding: "42px",
-            backdropFilter: "blur(18px)"
+            fontSize: "34px",
+            marginBottom: "30px",
+            fontWeight: "800"
           }}
         >
+          Create Premium Classroom
+        </h2>
 
-          <div
-            style={{
-              fontSize: "50px",
-              marginBottom: "24px"
-            }}
-          >
-            🎓
-          </div>
+        {/* Title */}
+        <input
+          type="text"
+          placeholder="Enter Classroom Title"
+          value={title}
+          onChange={(e) =>
+            setTitle(e.target.value)
+          }
+          style={{
+            width: "100%",
+            padding: "18px",
+            marginBottom: "22px",
+            borderRadius: "16px",
+            border:
+              "1px solid rgba(255,255,255,0.08)",
+            background:
+              "rgba(255,255,255,0.05)",
+            color: "white",
+            fontSize: "17px",
+            outline: "none"
+          }}
+        />
 
-          <h2
-            style={{
-              fontSize: "38px",
-              marginBottom: "20px"
-            }}
-          >
-            Create Classroom
-          </h2>
+        {/* Description */}
+        <textarea
+          placeholder="Enter Classroom Description"
+          value={description}
+          onChange={(e) =>
+            setDescription(
+              e.target.value
+            )
+          }
+          rows={5}
+          style={{
+            width: "100%",
+            padding: "18px",
+            marginBottom: "30px",
+            borderRadius: "16px",
+            border:
+              "1px solid rgba(255,255,255,0.08)",
+            background:
+              "rgba(255,255,255,0.05)",
+            color: "white",
+            fontSize: "17px",
+            resize: "none",
+            outline: "none"
+          }}
+        />
 
-          <p
-            style={{
-              color: "#cbd5e1",
-              lineHeight: "1.8",
-              marginBottom: "35px",
-              fontSize: "18px"
-            }}
-          >
-            Start premium live classrooms with
-            video conferencing,
-            whiteboard,
-            and screen sharing.
-          </p>
-
-          <button
-            onClick={createClassroom}
-            disabled={loading}
-            style={{
-              width: "100%",
-              padding: "18px",
-              borderRadius: "20px",
-              border: "none",
-              background:
-                "linear-gradient(135deg,#38bdf8,#2563eb)",
-              color: "white",
-              fontWeight: "800",
-              fontSize: "18px",
-              cursor: "pointer"
-            }}
-          >
-            {loading
+        {/* Button */}
+        <button
+          onClick={createClassroom}
+          disabled={loading}
+          style={{
+            width: "100%",
+            padding: "18px",
+            borderRadius: "18px",
+            border: "none",
+            background:
+              "linear-gradient(135deg,#3b82f6,#2563eb)",
+            color: "white",
+            fontSize: "18px",
+            fontWeight: "800",
+            cursor: "pointer",
+            transition: "0.3s"
+          }}
+        >
+          {
+            loading
               ? "Creating..."
-              : "Create Premium Classroom"}
-          </button>
-
-        </div>
-
-        {/* Join Classroom */}
-        <div
-          style={{
-            background:
-              "rgba(255,255,255,0.06)",
-            border:
-              "1px solid rgba(255,255,255,0.1)",
-            borderRadius: "32px",
-            padding: "42px",
-            backdropFilter: "blur(18px)"
-          }}
-        >
-
-          <div
-            style={{
-              fontSize: "50px",
-              marginBottom: "24px"
-            }}
-          >
-            🚀
-          </div>
-
-          <h2
-            style={{
-              fontSize: "38px",
-              marginBottom: "20px"
-            }}
-          >
-            Join Classroom
-          </h2>
-
-          <p
-            style={{
-              color: "#cbd5e1",
-              lineHeight: "1.8",
-              marginBottom: "25px",
-              fontSize: "18px"
-            }}
-          >
-            Enter room code to join
-            premium virtual sessions.
-          </p>
-
-          <input
-            type="text"
-            placeholder="Enter Room Code"
-            value={roomCode}
-            onChange={(e) =>
-              setRoomCode(e.target.value)
-            }
-            style={{
-              width: "100%",
-              padding: "18px",
-              marginBottom: "24px",
-              borderRadius: "18px",
-              border:
-                "1px solid rgba(255,255,255,0.1)",
-              background:
-                "rgba(15,23,42,0.9)",
-              color: "white",
-              fontSize: "16px",
-              outline: "none",
-              boxSizing: "border-box"
-            }}
-          />
-
-          <button
-            onClick={joinClassroom}
-            style={{
-              width: "100%",
-              padding: "18px",
-              borderRadius: "20px",
-              border: "none",
-              background:
-                "linear-gradient(135deg,#22c55e,#16a34a)",
-              color: "white",
-              fontWeight: "800",
-              fontSize: "18px",
-              cursor: "pointer"
-            }}
-          >
-            Join Classroom
-          </button>
-
-        </div>
+              : "Create Classroom"
+          }
+        </button>
 
       </div>
 
