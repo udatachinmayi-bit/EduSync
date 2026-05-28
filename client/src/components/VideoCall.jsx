@@ -55,6 +55,11 @@ function VideoCall({ roomCode }) {
 
         if (mounted) {
 
+          console.log(
+            "LIVEKIT RESPONSE:",
+            res.data
+          );
+
           setConnectionInfo({
 
             token: res.data.token,
@@ -103,8 +108,7 @@ function VideoCall({ roomCode }) {
             "linear-gradient(135deg,#020617,#111827)",
           color: "white",
           fontSize: "28px",
-          fontWeight: "800",
-          borderRadius: "24px"
+          fontWeight: "800"
         }}
       >
         ❌ {error}
@@ -129,57 +133,18 @@ function VideoCall({ roomCode }) {
           alignItems: "center",
           background:
             "linear-gradient(135deg,#020617,#111827)",
-          color: "white",
-          borderRadius: "24px"
+          color: "white"
         }}
       >
 
-        <div
+        <h1
           style={{
-            width: "80px",
-            height: "80px",
-            border:
-              "6px solid rgba(255,255,255,0.08)",
-            borderTop:
-              "6px solid #38bdf8",
-            borderRadius: "50%",
-            animation:
-              "spin 1s linear infinite"
-          }}
-        />
-
-        <h2
-          style={{
-            marginTop: "28px",
-            fontSize: "34px",
+            fontSize: "40px",
             fontWeight: "900"
           }}
         >
           Joining Classroom...
-        </h2>
-
-        <p
-          style={{
-            marginTop: "12px",
-            color: "#cbd5e1",
-            fontSize: "18px"
-          }}
-        >
-          Connecting to EduSync Live Session
-        </p>
-
-        <style>
-          {`
-            @keyframes spin {
-              from {
-                transform: rotate(0deg);
-              }
-              to {
-                transform: rotate(360deg);
-              }
-            }
-          `}
-        </style>
+        </h1>
 
       </div>
 
@@ -196,14 +161,12 @@ function VideoCall({ roomCode }) {
         height: "100%",
         width: "100%",
         position: "relative",
-        overflow: "hidden",
-        borderRadius: "24px",
         background:
-          "linear-gradient(135deg,#020617,#111827)"
+          "#0f172a"
       }}
     >
 
-      {/* ================= TOP LEFT ================= */}
+      {/* ================= TOP BAR ================= */}
 
       <div
         style={{
@@ -211,39 +174,15 @@ function VideoCall({ roomCode }) {
           top: "20px",
           left: "20px",
           zIndex: 1000,
-          padding: "14px 22px",
-          borderRadius: "18px",
           background:
-            "rgba(15,23,42,0.85)",
-          backdropFilter: "blur(14px)",
-          border:
-            "1px solid rgba(255,255,255,0.08)",
+            "rgba(15,23,42,0.9)",
+          padding: "12px 20px",
+          borderRadius: "16px",
           color: "white",
-          boxShadow:
-            "0 15px 35px rgba(0,0,0,0.35)"
+          fontWeight: "800"
         }}
       >
-
-        <h3
-          style={{
-            margin: 0,
-            fontSize: "22px",
-            fontWeight: "900"
-          }}
-        >
-          🎥 EduSync Live
-        </h3>
-
-        <p
-          style={{
-            margin: "6px 0 0",
-            color: "#cbd5e1",
-            fontSize: "14px"
-          }}
-        >
-          Room: {roomCode}
-        </p>
-
+        🎥 EduSync Live — {roomCode}
       </div>
 
       {/* ================= CHAT BUTTON ================= */}
@@ -257,23 +196,20 @@ function VideoCall({ roomCode }) {
           top: "20px",
           right: "20px",
           zIndex: 1000,
-          padding: "14px 22px",
-          borderRadius: "16px",
           border: "none",
+          borderRadius: "14px",
+          padding: "14px 22px",
           background:
-            "linear-gradient(135deg,#38bdf8,#2563eb)",
+            "#2563eb",
           color: "white",
           fontWeight: "800",
-          fontSize: "16px",
-          cursor: "pointer",
-          boxShadow:
-            "0 10px 30px rgba(37,99,235,0.35)"
+          cursor: "pointer"
         }}
       >
         💬 Chat
       </button>
 
-      {/* ================= LIVEKIT ROOM ================= */}
+      {/* ================= LIVEKIT ================= */}
 
       <LiveKitRoom
 
@@ -290,13 +226,29 @@ function VideoCall({ roomCode }) {
         data-lk-theme="default"
 
         style={{
-          height: "100%",
+          height: "100vh",
           width: "100%"
+        }}
+
+        onConnected={() => {
+
+          console.log(
+            "✅ Connected to LiveKit"
+          );
+
+        }}
+
+        onDisconnected={() => {
+
+          console.log(
+            "❌ Disconnected"
+          );
+
         }}
 
       >
 
-        {/* ================= VIDEO CONFERENCE ================= */}
+        {/* ================= VIDEO UI ================= */}
 
         <VideoConference />
 
@@ -304,7 +256,7 @@ function VideoCall({ roomCode }) {
 
         <RoomAudioRenderer />
 
-        {/* ================= CHAT PANEL ================= */}
+        {/* ================= CHAT ================= */}
 
         {
           showChat && (
@@ -312,34 +264,30 @@ function VideoCall({ roomCode }) {
             <div
               style={{
                 position: "absolute",
-                top: "85px",
+                top: "90px",
                 right: "20px",
                 width: "340px",
-                height: "520px",
+                height: "500px",
                 background:
-                  "rgba(15,23,42,0.96)",
-                borderRadius: "24px",
+                  "rgba(15,23,42,0.95)",
+                borderRadius: "20px",
                 overflow: "hidden",
-                border:
-                  "1px solid rgba(255,255,255,0.08)",
                 zIndex: 1000,
-                backdropFilter: "blur(14px)",
-                boxShadow:
-                  "0 20px 50px rgba(0,0,0,0.45)"
+                border:
+                  "1px solid rgba(255,255,255,0.08)"
               }}
             >
 
               <div
                 style={{
                   padding: "18px",
-                  borderBottom:
-                    "1px solid rgba(255,255,255,0.08)",
                   color: "white",
                   fontWeight: "900",
-                  fontSize: "20px"
+                  borderBottom:
+                    "1px solid rgba(255,255,255,0.08)"
                 }}
               >
-                💬 Classroom Chat
+                Classroom Chat
               </div>
 
               <div
@@ -348,9 +296,7 @@ function VideoCall({ roomCode }) {
                     "calc(100% - 70px)"
                 }}
               >
-
                 <Chat />
-
               </div>
 
             </div>
