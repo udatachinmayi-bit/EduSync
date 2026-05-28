@@ -1,225 +1,445 @@
-{/* Main Dashboard */}
-<div
-  style={{
-    display: "grid",
-    gridTemplateColumns:
-      "repeat(auto-fit,minmax(420px,1fr))",
-    gap: "30px",
-    marginTop: "50px"
-  }}
->
+import { useEffect, useState } from "react";
+import axios from "axios";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
-  {/* ================= CREATE CLASSROOM ================= */}
-  <div
-    style={{
-      background:
-        "rgba(15,23,42,0.88)",
-      border:
-        "1px solid rgba(255,255,255,0.08)",
-      borderRadius: "30px",
-      padding: "40px",
-      backdropFilter: "blur(18px)",
-      boxShadow:
-        "0 25px 60px rgba(0,0,0,0.35)"
-    }}
-  >
+function Dashboard() {
 
-    <h2
-      style={{
-        fontSize: "38px",
-        fontWeight: "900",
-        color: "white",
-        marginBottom: "10px"
-      }}
-    >
-      🚀 Create Classroom
-    </h2>
+  const navigate = useNavigate();
 
-    <p
-      style={{
-        color: "#94a3b8",
-        marginBottom: "30px",
-        fontSize: "16px"
-      }}
-    >
-      Start live collaborative learning session
-    </p>
+  const [loading, setLoading] =
+    useState(false);
 
-    {/* Title */}
-    <input
-      type="text"
-      placeholder="Classroom Title"
-      value={title}
-      onChange={(e) =>
-        setTitle(e.target.value)
-      }
-      style={{
-        width: "100%",
-        padding: "18px",
-        marginBottom: "20px",
-        borderRadius: "18px",
-        border:
-          "1px solid rgba(255,255,255,0.08)",
-        background:
-          "rgba(255,255,255,0.05)",
-        color: "white",
-        fontSize: "16px",
-        outline: "none"
-      }}
-    />
+  const [joinLoading, setJoinLoading] =
+    useState(false);
 
-    {/* Description */}
-    <textarea
-      placeholder="Classroom Description"
-      value={description}
-      onChange={(e) =>
-        setDescription(
-          e.target.value
-        )
-      }
-      rows={5}
-      style={{
-        width: "100%",
-        padding: "18px",
-        marginBottom: "28px",
-        borderRadius: "18px",
-        border:
-          "1px solid rgba(255,255,255,0.08)",
-        background:
-          "rgba(255,255,255,0.05)",
-        color: "white",
-        fontSize: "16px",
-        resize: "none",
-        outline: "none"
-      }}
-    />
+  const [title, setTitle] =
+    useState("");
 
-    {/* Create Button */}
-    <button
-      onClick={createClassroom}
-      disabled={loading}
-      style={{
-        width: "100%",
-        padding: "18px",
-        borderRadius: "18px",
-        border: "none",
-        background:
-          "linear-gradient(135deg,#3b82f6,#2563eb)",
-        color: "white",
-        fontSize: "18px",
-        fontWeight: "800",
-        cursor: "pointer",
-        boxShadow:
-          "0 15px 35px rgba(59,130,246,0.35)"
-      }}
-    >
-      {
-        loading
-          ? "Creating..."
-          : "Create Classroom"
-      }
-    </button>
+  const [description, setDescription] =
+    useState("");
 
-  </div>
+  const [roomCode, setRoomCode] =
+    useState("");
 
-  {/* ================= JOIN CLASSROOM ================= */}
-  <div
-    style={{
-      background:
-        "rgba(15,23,42,0.88)",
-      border:
-        "1px solid rgba(255,255,255,0.08)",
-      borderRadius: "30px",
-      padding: "40px",
-      backdropFilter: "blur(18px)",
-      boxShadow:
-        "0 25px 60px rgba(0,0,0,0.35)"
-    }}
-  >
+  const [user, setUser] =
+    useState(null);
 
-    <h2
-      style={{
-        fontSize: "38px",
-        fontWeight: "900",
-        color: "white",
-        marginBottom: "10px"
-      }}
-    >
-      🎯 Join Classroom
-    </h2>
+  /* Check Login */
+  useEffect(() => {
 
-    <p
-      style={{
-        color: "#94a3b8",
-        marginBottom: "30px",
-        fontSize: "16px"
-      }}
-    >
-      Join existing room using classroom code
-    </p>
+    const storedUser = JSON.parse(
+      localStorage.getItem("userInfo")
+    );
 
-    {/* Join Input */}
-    <input
-      type="text"
-      placeholder="Enter Room Code"
-      value={joinCode}
-      onChange={(e) =>
-        setJoinCode(
-          e.target.value
-        )
-      }
-      style={{
-        width: "100%",
-        padding: "18px",
-        marginBottom: "28px",
-        borderRadius: "18px",
-        border:
-          "1px solid rgba(255,255,255,0.08)",
-        background:
-          "rgba(255,255,255,0.05)",
-        color: "white",
-        fontSize: "16px",
-        outline: "none"
-      }}
-    />
+    if (!storedUser?.token) {
 
-    {/* Join Button */}
-    <button
-      onClick={() => {
+      navigate("/login");
+      return;
 
-        if (!joinCode) {
+    }
 
-          alert(
-            "Please enter room code"
-          );
+    setUser(storedUser);
 
-          return;
+  }, [navigate]);
 
+  /* Create Classroom */
+  const createClassroom = async () => {
+
+    try {
+
+      setLoading(true);
+
+      toast.loading(
+        "Creating Classroom...",
+        {
+          id: "createRoom"
+        }
+      );
+
+      const storedUser = JSON.parse(
+        localStorage.getItem("userInfo")
+      );
+
+      const response = await axios.post(
+
+        `${import.meta.env.VITE_API_URL}/api/classrooms/create`,
+
+        {
+          title,
+          description
+        },
+
+        {
+          headers: {
+            Authorization:
+              `Bearer ${storedUser?.token}`,
+            "Content-Type":
+              "application/json"
+          }
         }
 
-        navigate(
-          `/classroom/${joinCode}`
+      );
+
+      toast.dismiss("createRoom");
+
+      toast.success(
+        "Classroom Created Successfully!"
+      );
+
+      navigate(
+        `/classroom/${response.data.roomCode}`
+      );
+
+    } catch (error) {
+
+      console.error(error);
+
+      toast.dismiss("createRoom");
+
+      toast.error(
+        error.response?.data?.message ||
+        "Failed to create classroom"
+      );
+
+    } finally {
+
+      setLoading(false);
+
+    }
+
+  };
+
+  /* Join Classroom */
+  const joinClassroom = async () => {
+
+    if (!roomCode) {
+
+      toast.error(
+        "Please enter classroom code"
+      );
+
+      return;
+
+    }
+
+    try {
+
+      setJoinLoading(true);
+
+      toast.loading(
+        "Joining Classroom...",
+        {
+          id: "joinRoom"
+        }
+      );
+
+      setTimeout(() => {
+
+        toast.dismiss("joinRoom");
+
+        toast.success(
+          "Joined Successfully!"
         );
 
-      }}
+        navigate(
+          `/classroom/${roomCode}`
+        );
+
+      }, 1000);
+
+    } catch (error) {
+
+      console.error(error);
+
+      toast.dismiss("joinRoom");
+
+      toast.error(
+        "Failed to join classroom"
+      );
+
+    } finally {
+
+      setJoinLoading(false);
+
+    }
+
+  };
+
+  return (
+
+    <div
       style={{
-        width: "100%",
-        padding: "18px",
-        borderRadius: "18px",
-        border: "none",
+        minHeight: "100vh",
         background:
-          "linear-gradient(135deg,#8b5cf6,#7c3aed)",
-        color: "white",
-        fontSize: "18px",
-        fontWeight: "800",
-        cursor: "pointer",
-        boxShadow:
-          "0 15px 35px rgba(139,92,246,0.35)"
+          "linear-gradient(135deg,#020617,#0f172a,#1e293b)",
+        padding: "40px",
+        color: "white"
       }}
     >
-      Join Classroom
-    </button>
 
-  </div>
+      {/* Top Section */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent:
+            "space-between",
+          alignItems: "center",
+          marginBottom: "60px",
+          flexWrap: "wrap",
+          gap: "20px"
+        }}
+      >
 
-</div>
+        <div>
+
+          <h1
+            style={{
+              fontSize: "60px",
+              fontWeight: "900",
+              marginBottom: "10px"
+            }}
+          >
+            EduSync Dashboard
+          </h1>
+
+          <p
+            style={{
+              color: "#94a3b8",
+              fontSize: "20px"
+            }}
+          >
+            Welcome back,
+            {" "}
+            {user?.name}
+          </p>
+
+        </div>
+
+        <button
+          onClick={() => {
+
+            localStorage.removeItem(
+              "userInfo"
+            );
+
+            navigate("/login");
+
+          }}
+          style={{
+            background:
+              "linear-gradient(135deg,#ef4444,#dc2626)",
+            border: "none",
+            padding:
+              "14px 28px",
+            borderRadius: "16px",
+            color: "white",
+            fontSize: "16px",
+            fontWeight: "700",
+            cursor: "pointer"
+          }}
+        >
+          Logout
+        </button>
+
+      </div>
+
+      {/* Main Grid */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns:
+            "repeat(auto-fit,minmax(420px,1fr))",
+          gap: "40px",
+          maxWidth: "1400px",
+          margin: "auto"
+        }}
+      >
+
+        {/* Create Classroom */}
+        <div
+          style={{
+            background:
+              "rgba(15,23,42,0.8)",
+            backdropFilter:
+              "blur(20px)",
+            border:
+              "1px solid rgba(255,255,255,0.08)",
+            borderRadius: "28px",
+            padding: "40px",
+            boxShadow:
+              "0 20px 60px rgba(0,0,0,0.4)"
+          }}
+        >
+
+          <h2
+            style={{
+              fontSize: "34px",
+              marginBottom: "30px",
+              fontWeight: "800"
+            }}
+          >
+            Create Premium Classroom
+          </h2>
+
+          <input
+            type="text"
+            placeholder="Enter Classroom Title"
+            value={title}
+            onChange={(e) =>
+              setTitle(e.target.value)
+            }
+            style={{
+              width: "100%",
+              padding: "18px",
+              marginBottom: "22px",
+              borderRadius: "16px",
+              border:
+                "1px solid rgba(255,255,255,0.08)",
+              background:
+                "rgba(255,255,255,0.05)",
+              color: "white",
+              fontSize: "17px",
+              outline: "none"
+            }}
+          />
+
+          <textarea
+            placeholder="Enter Classroom Description"
+            value={description}
+            onChange={(e) =>
+              setDescription(
+                e.target.value
+              )
+            }
+            rows={5}
+            style={{
+              width: "100%",
+              padding: "18px",
+              marginBottom: "30px",
+              borderRadius: "16px",
+              border:
+                "1px solid rgba(255,255,255,0.08)",
+              background:
+                "rgba(255,255,255,0.05)",
+              color: "white",
+              fontSize: "17px",
+              resize: "none",
+              outline: "none"
+            }}
+          />
+
+          <button
+            onClick={createClassroom}
+            disabled={loading}
+            style={{
+              width: "100%",
+              padding: "18px",
+              borderRadius: "18px",
+              border: "none",
+              background:
+                "linear-gradient(135deg,#3b82f6,#2563eb)",
+              color: "white",
+              fontSize: "18px",
+              fontWeight: "800",
+              cursor: "pointer"
+            }}
+          >
+            {
+              loading
+                ? "Creating..."
+                : "Create Classroom"
+            }
+          </button>
+
+        </div>
+
+        {/* Join Classroom */}
+        <div
+          style={{
+            background:
+              "rgba(15,23,42,0.8)",
+            backdropFilter:
+              "blur(20px)",
+            border:
+              "1px solid rgba(255,255,255,0.08)",
+            borderRadius: "28px",
+            padding: "40px",
+            boxShadow:
+              "0 20px 60px rgba(0,0,0,0.4)"
+          }}
+        >
+
+          <h2
+            style={{
+              fontSize: "34px",
+              marginBottom: "30px",
+              fontWeight: "800"
+            }}
+          >
+            Join Classroom
+          </h2>
+
+          <input
+            type="text"
+            placeholder="Enter Classroom Code"
+            value={roomCode}
+            onChange={(e) =>
+              setRoomCode(e.target.value)
+            }
+            style={{
+              width: "100%",
+              padding: "18px",
+              marginBottom: "25px",
+              borderRadius: "16px",
+              border:
+                "1px solid rgba(255,255,255,0.08)",
+              background:
+                "rgba(255,255,255,0.05)",
+              color: "white",
+              fontSize: "17px",
+              outline: "none"
+            }}
+          />
+
+          <div
+            style={{
+              marginTop: "80px"
+            }}
+          >
+
+            <button
+              onClick={joinClassroom}
+              disabled={joinLoading}
+              style={{
+                width: "100%",
+                padding: "18px",
+                borderRadius: "18px",
+                border: "none",
+                background:
+                  "linear-gradient(135deg,#22c55e,#16a34a)",
+                color: "white",
+                fontSize: "18px",
+                fontWeight: "800",
+                cursor: "pointer"
+              }}
+            >
+              {
+                joinLoading
+                  ? "Joining..."
+                  : "Join Classroom"
+              }
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  );
+}
+
+export default Dashboard;
