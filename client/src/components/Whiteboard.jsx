@@ -6,9 +6,9 @@ import { io } from "socket.io-client";
 
 /* Production Socket Connection */
 const socket = io(
-  import.meta.env.VITE_API_URL,
+  "https://edusync-backend.onrender.com",
   {
-    transports: ["websocket", "polling"],
+    transports: ["websocket"],
     withCredentials: true,
     reconnection: true,
     reconnectionAttempts: 10,

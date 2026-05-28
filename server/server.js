@@ -10,96 +10,161 @@ const authRoutes = require("./routes/authRoutes");
 const classroomRoutes = require("./routes/classroomRoutes");
 const livekitRoutes = require("./routes/livekitRoutes");
 
+/* Load Env */
 dotenv.config();
 
-/* Connect Database */
+/* Connect MongoDB */
 connectDB();
 
 const app = express();
 
-/* Middlewares */
+/* ================= MIDDLEWARES ================= */
+
 app.use(
   cors({
-    origin: "*",
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    origin: [
+      "https://edu-sync-kappa-coral.vercel.app",
+      "http://localhost:5173"
+    ],
+    methods: [
+      "GET",
+      "POST",
+      "PUT",
+      "DELETE"
+    ],
     credentials: true
   })
 );
 
-app.use(express.json({
-  limit: "50mb"
-}));
+app.use(
+  express.json({
+    limit: "50mb"
+  })
+);
 
-/* Routes */
-app.use("/api/auth", authRoutes);
-app.use("/api/classrooms", classroomRoutes);
-app.use("/api/livekit", livekitRoutes);
+/* ================= ROUTES ================= */
 
-/* Test Route */
+app.use(
+  "/api/auth",
+  authRoutes
+);
+
+app.use(
+  "/api/classrooms",
+  classroomRoutes
+);
+
+app.use(
+  "/api/livekit",
+  livekitRoutes
+);
+
+/* ================= TEST ROUTE ================= */
+
 app.get("/", (req, res) => {
-  res.send("EduSync Backend Running");
+
+  res.send(
+    "EduSync Backend Running 🚀"
+  );
+
 });
 
-/* Create HTTP Server */
-const server = http.createServer(app);
+/* ================= CREATE SERVER ================= */
 
-/* Socket.IO Setup */
+const server =
+  http.createServer(app);
+
+/* ================= SOCKET.IO ================= */
+
 const io = new Server(server, {
+
   cors: {
-    origin: "*",
-    methods: ["GET", "POST"],
+
+    origin: [
+      "https://edu-sync-kappa-coral.vercel.app",
+      "http://localhost:5173"
+    ],
+
+    methods: [
+      "GET",
+      "POST"
+    ],
+
     credentials: true
-  }
+
+  },
+
+  transports: [
+    "websocket",
+    "polling"
+  ]
+
 });
 
-/* Store Whiteboard Data */
+/* ================= WHITEBOARD STORAGE ================= */
+
 const whiteboards = {};
 
-/* Socket Connection */
+/* ================= SOCKET CONNECTION ================= */
+
 io.on("connection", (socket) => {
 
-  console.log("User Connected:", socket.id);
+  console.log(
+    "✅ User Connected:",
+    socket.id
+  );
 
-  /* Join Room */
-  socket.on("join-room", (roomCode) => {
+  /* JOIN ROOM */
+  socket.on(
+    "join-room",
+    (roomCode) => {
 
-    socket.join(roomCode);
+      socket.join(roomCode);
 
-    console.log(
-      `Socket ${socket.id} joined room ${roomCode}`
-    );
+      console.log(
+        `📌 ${socket.id} joined ${roomCode}`
+      );
 
-    /* Send Existing Whiteboard */
-    if (whiteboards[roomCode]) {
-
-      socket.emit(
-        "whiteboard-data",
+      /* Send Existing Whiteboard */
+      if (
         whiteboards[roomCode]
+      ) {
+
+        socket.emit(
+          "whiteboard-data",
+          whiteboards[roomCode]
+        );
+
+      }
+
+    }
+  );
+
+  /* CHAT MESSAGE */
+  socket.on(
+    "send-message",
+    (data) => {
+
+      io.to(
+        data.roomCode
+      ).emit(
+        "receive-message",
+        data
       );
 
     }
+  );
 
-  });
-
-  /* Chat Messages */
-  socket.on("send-message", (data) => {
-
-    io.to(data.roomCode).emit(
-      "receive-message",
-      data
-    );
-
-  });
-
-  /* Whiteboard Sync */
+  /* WHITEBOARD */
   socket.on(
     "whiteboard-data",
     ({ roomCode, elements }) => {
 
-      /* Save Current Whiteboard */
-      whiteboards[roomCode] = elements;
+      /* Save Board */
+      whiteboards[roomCode] =
+        elements;
 
-      /* Broadcast to Everyone Except Sender */
+      /* Broadcast */
       socket.to(roomCode).emit(
         "whiteboard-data",
         elements
@@ -108,25 +173,30 @@ io.on("connection", (socket) => {
     }
   );
 
-  /* Disconnect */
-  socket.on("disconnect", () => {
+  /* DISCONNECT */
+  socket.on(
+    "disconnect",
+    () => {
 
-    console.log(
-      "User Disconnected:",
-      socket.id
-    );
+      console.log(
+        "❌ User Disconnected:",
+        socket.id
+      );
 
-  });
+    }
+  );
 
 });
 
-/* Start Server */
-const PORT = process.env.PORT || 5000;
+/* ================= START SERVER ================= */
+
+const PORT =
+  process.env.PORT || 5000;
 
 server.listen(PORT, () => {
 
   console.log(
-    `Server running on port ${PORT}`
+    `🚀 Server running on port ${PORT}`
   );
 
 });

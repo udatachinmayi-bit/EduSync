@@ -10,15 +10,16 @@ function Classroom() {
 
   const navigate = useNavigate();
 
-  /* FIXED USER */
+  /* Logged In User */
   const user = JSON.parse(
     localStorage.getItem("userInfo")
   );
 
+  /* Whiteboard Toggle */
   const [showWhiteboard, setShowWhiteboard] =
     useState(false);
 
-  /* If not logged in */
+  /* Redirect if not logged in */
   if (!user) {
 
     navigate("/login");
@@ -28,11 +29,23 @@ function Classroom() {
   }
 
   /* Copy Room Code */
-  const copyRoomCode = () => {
+  const copyRoomCode = async () => {
 
-    navigator.clipboard.writeText(roomCode);
+    try {
 
-    alert("Room code copied!");
+      await navigator.clipboard.writeText(
+        roomCode
+      );
+
+      alert("Room code copied!");
+
+    } catch (error) {
+
+      console.error(error);
+
+      alert("Failed to copy code");
+
+    }
 
   };
 
@@ -49,15 +62,15 @@ function Classroom() {
       }}
     >
 
-      {/* Top Menu */}
+      {/* ================= TOP MENU ================= */}
       <div
         style={{
           width: "100%",
           padding: "18px 30px",
           display: "flex",
           justifyContent: "center",
-          gap: "20px",
           alignItems: "center",
+          gap: "20px",
           background:
             "rgba(15,23,42,0.75)",
           backdropFilter: "blur(18px)",
@@ -67,7 +80,7 @@ function Classroom() {
         }}
       >
 
-        {/* Copy Code */}
+        {/* Copy Room Code */}
         <button
           onClick={copyRoomCode}
           style={{
@@ -87,7 +100,7 @@ function Classroom() {
           📋 Copy Code
         </button>
 
-        {/* Whiteboard Toggle */}
+        {/* Whiteboard Button */}
         <button
           onClick={() =>
             setShowWhiteboard(
@@ -108,10 +121,14 @@ function Classroom() {
               "0 10px 30px rgba(139,92,246,0.45)"
           }}
         >
-          📝 Open Whiteboard
+          {
+            showWhiteboard
+              ? "❌ Close Whiteboard"
+              : "📝 Open Whiteboard"
+          }
         </button>
 
-        {/* Leave */}
+        {/* Leave Button */}
         <button
           onClick={() =>
             navigate("/dashboard")
@@ -135,7 +152,7 @@ function Classroom() {
 
       </div>
 
-      {/* Main Layout */}
+      {/* ================= MAIN CONTENT ================= */}
       <div
         style={{
           flex: 1,
@@ -146,7 +163,7 @@ function Classroom() {
         }}
       >
 
-        {/* Video Call */}
+        {/* ================= VIDEO SECTION ================= */}
         <div
           style={{
             flex:
@@ -162,17 +179,18 @@ function Classroom() {
               "0 20px 60px rgba(0,0,0,0.45)"
           }}
         >
+
+          {/* FIXED VIDEOCALL */}
           <VideoCall
             roomCode={roomCode}
-            username={
-              user?.name || "Guest"
-            }
           />
+
         </div>
 
-        {/* Whiteboard */}
+        {/* ================= WHITEBOARD ================= */}
         {
           showWhiteboard && (
+
             <div
               style={{
                 flex: 1,
@@ -185,10 +203,13 @@ function Classroom() {
                   "0 20px 60px rgba(0,0,0,0.45)"
               }}
             >
+
               <Whiteboard
                 roomCode={roomCode}
               />
+
             </div>
+
           )
         }
 
@@ -196,6 +217,7 @@ function Classroom() {
 
     </div>
   );
+
 }
 
 export default Classroom;
