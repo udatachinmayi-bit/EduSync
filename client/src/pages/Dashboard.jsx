@@ -50,23 +50,18 @@ function Dashboard() {
 
       }
 
-      const response = await axios.post(
-        "http://localhost:5000/api/classrooms/create",
-
-        {
-          title: "Premium Classroom"
-        },
-
-        {
-          headers: {
-            Authorization:
-              `Bearer ${storedUser.token}`,
-            "Content-Type":
-              "application/json"
-          }
-        }
-      );
-
+   const response = await axios.post(
+  `${import.meta.env.VITE_API_URL}/api/classrooms/create`,
+  {
+    title,
+    description
+  },
+  {
+    headers: {
+      Authorization: `Bearer ${storedUser.token}`
+    }
+  }
+);
       toast.dismiss("createRoom");
 
       toast.success(

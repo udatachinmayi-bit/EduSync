@@ -39,14 +39,13 @@ function VideoCall({ roomCode }) {
 
       try {
 
-        const res = await axios.post(
-          "http://localhost:5000/api/livekit/token",
-          {
-            roomCode,
-            username
-          }
-        );
-
+     const res = await axios.post(
+  `${import.meta.env.VITE_API_URL}/api/livekit/token`,
+  {
+    roomCode,
+    username: user?.name || "Guest"
+  }
+);
         if (mounted) {
 
           setConnectionInfo({
