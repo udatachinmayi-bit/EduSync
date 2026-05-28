@@ -1,6 +1,10 @@
 import { useState, useEffect } from "react";
 import { io } from "socket.io-client";
 
+const user = JSON.parse(
+  localStorage.getItem("userInfo")
+);
+
 const socket = io("https://edusync-0w0o.onrender.com");
 
 function ChatBox({ roomCode, user }) {
@@ -22,7 +26,7 @@ function ChatBox({ roomCode, user }) {
   const sendMessage = () => {
     socket.emit("send-message", {
       roomCode,
-      sender: user.name,
+  sender: user?.name || "Guest",
       message
     });
 
