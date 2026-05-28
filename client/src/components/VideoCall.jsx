@@ -12,7 +12,7 @@ import "@livekit/components-styles";
 
 function VideoCall({ roomCode }) {
 
-  /* User */
+  /* Logged In User */
   const storedUser = JSON.parse(
     localStorage.getItem("userInfo")
   );
@@ -30,7 +30,7 @@ function VideoCall({ roomCode }) {
   const [showChat, setShowChat] =
     useState(false);
 
-  /* Fetch Token */
+  /* Fetch LiveKit Token */
   useEffect(() => {
 
     let mounted = true;
@@ -39,18 +39,25 @@ function VideoCall({ roomCode }) {
 
       try {
 
-     const res = await axios.post(
-  `${import.meta.env.VITE_API_URL}/api/livekit/token`,
-  {
-    roomCode,
-    username: user?.name || "Guest"
-  }
-);
+        const res = await axios.post(
+
+          `${import.meta.env.VITE_API_URL}/api/livekit/token`,
+
+          {
+            roomCode,
+            username
+          }
+
+        );
+
         if (mounted) {
 
           setConnectionInfo({
+
             token: res.data.token,
+
             url: res.data.url
+
           });
 
         }
@@ -101,7 +108,7 @@ function VideoCall({ roomCode }) {
 
   }
 
-  /* Loading Screen */
+  /* Loading */
   if (!connectionInfo) {
 
     return (
@@ -227,7 +234,7 @@ function VideoCall({ roomCode }) {
 
       </div>
 
-      {/* Chat Toggle */}
+      {/* Chat Button */}
       <button
         onClick={() =>
           setShowChat(!showChat)
@@ -245,106 +252,73 @@ function VideoCall({ roomCode }) {
           color: "white",
           fontWeight: "800",
           fontSize: "16px",
-          cursor: "pointer",
-          boxShadow:
-            "0 15px 35px rgba(56,189,248,0.35)"
+          cursor: "pointer"
         }}
       >
         💬 Chat
       </button>
 
-      {/* LiveKit Room */}
+      {/* LiveKit */}
       <LiveKitRoom
         token={connectionInfo.token}
         serverUrl={connectionInfo.url}
-
         connect={true}
-
-        /* IMPORTANT FIX */
         video={false}
         audio={false}
-
         data-lk-theme="default"
-
-        options={{
-          adaptiveStream: true,
-          dynacast: true,
-          stopLocalTrackOnUnpublish: true,
-
-          publishDefaults: {
-            simulcast: false,
-            videoCodec: "vp8"
-          }
-        }}
-
-        onConnected={() => {
-          console.log(
-            "Connected Successfully"
-          );
-        }}
-
-        onDisconnected={() => {
-          console.log(
-            "Disconnected from Room"
-          );
-        }}
-
         style={{
           height: "100%",
           width: "100%"
         }}
       >
 
-        {/* Video Conference */}
+        {/* Full Screen Video */}
         <VideoConference />
 
         {/* Audio */}
         <RoomAudioRenderer />
 
         {/* Chat */}
-        {showChat && (
+        {
+          showChat && (
 
-          <div
-            style={{
-              position: "absolute",
-              top: "85px",
-              right: "20px",
-              width: "340px",
-              height: "520px",
-              background:
-                "rgba(15,23,42,0.96)",
-              borderRadius: "24px",
-              overflow: "hidden",
-              border:
-                "1px solid rgba(255,255,255,0.08)",
-              zIndex: 1000,
-              backdropFilter: "blur(14px)",
-              boxShadow:
-                "0 20px 40px rgba(0,0,0,0.45)"
-            }}
-          >
-
-            {/* Chat Header */}
             <div
               style={{
-                padding: "18px",
-                borderBottom:
-                  "1px solid rgba(255,255,255,0.08)",
-                color: "white",
-                fontWeight: "900",
-                fontSize: "20px",
+                position: "absolute",
+                top: "85px",
+                right: "20px",
+                width: "340px",
+                height: "520px",
                 background:
-                  "rgba(255,255,255,0.03)"
+                  "rgba(15,23,42,0.96)",
+                borderRadius: "24px",
+                overflow: "hidden",
+                border:
+                  "1px solid rgba(255,255,255,0.08)",
+                zIndex: 1000,
+                backdropFilter: "blur(14px)"
               }}
             >
-              💬 Classroom Chat
+
+              <div
+                style={{
+                  padding: "18px",
+                  borderBottom:
+                    "1px solid rgba(255,255,255,0.08)",
+                  color: "white",
+                  fontWeight: "900",
+                  fontSize: "20px"
+                }}
+              >
+                💬 Classroom Chat
+              </div>
+
+              <Chat />
+
             </div>
 
-            <Chat />
-
-          </div>
-
-        )}
+          )
+        }
 
       </LiveKitRoom>
 
