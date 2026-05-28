@@ -2,7 +2,8 @@ const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
-/* Generate JWT Token */
+/* ================= GENERATE JWT TOKEN ================= */
+
 const generateToken = (id) => {
 
   if (!process.env.JWT_SECRET) {
@@ -40,7 +41,7 @@ const registerUser = async (req, res) => {
       role
     } = req.body;
 
-    /* Validation */
+    /* Validate Input */
     if (
       !name ||
       !email ||
@@ -49,13 +50,17 @@ const registerUser = async (req, res) => {
     ) {
 
       return res.status(400).json({
+
+        success: false,
+
         message:
           "Please fill all fields"
+
       });
 
     }
 
-    /* Clean Input */
+    /* Clean Data */
     name = name.trim();
 
     email = email
@@ -71,8 +76,12 @@ const registerUser = async (req, res) => {
     if (existingUser) {
 
       return res.status(400).json({
+
+        success: false,
+
         message:
           "User already exists"
+
       });
 
     }
@@ -97,8 +106,10 @@ const registerUser = async (req, res) => {
 
     });
 
-    /* Success Response */
+    /* Response */
     res.status(201).json({
+
+      success: true,
 
       _id: user._id,
 
@@ -123,6 +134,8 @@ const registerUser = async (req, res) => {
 
     res.status(500).json({
 
+      success: false,
+
       message:
         error.message ||
         "Registration failed"
@@ -144,13 +157,15 @@ const loginUser = async (req, res) => {
       password
     } = req.body;
 
-    /* Validation */
+    /* Validate */
     if (
       !email ||
       !password
     ) {
 
       return res.status(400).json({
+
+        success: false,
 
         message:
           "Email and password required"
@@ -174,6 +189,8 @@ const loginUser = async (req, res) => {
 
       return res.status(401).json({
 
+        success: false,
+
         message:
           "User not found"
 
@@ -192,6 +209,8 @@ const loginUser = async (req, res) => {
 
       return res.status(401).json({
 
+        success: false,
+
         message:
           "Invalid password"
 
@@ -199,8 +218,10 @@ const loginUser = async (req, res) => {
 
     }
 
-    /* Login Success */
+    /* Success */
     res.status(200).json({
+
+      success: true,
 
       _id: user._id,
 
@@ -224,6 +245,8 @@ const loginUser = async (req, res) => {
     );
 
     res.status(500).json({
+
+      success: false,
 
       message:
         error.message ||
