@@ -81,7 +81,7 @@ function Dashboard() {
         {
           headers: {
             Authorization:
-              `Bearer ${storeduser?.token}`,
+              `Bearer ${storedUser?.token}`,
             "Content-Type":
               "application/json"
           }
