@@ -12,7 +12,8 @@ import "@livekit/components-styles";
 
 function VideoCall({ roomCode }) {
 
-  /* Logged In User */
+  /* ================= USER ================= */
+
   const storedUser = JSON.parse(
     localStorage.getItem("userInfo")
   );
@@ -20,7 +21,8 @@ function VideoCall({ roomCode }) {
   const username =
     storedUser?.name || "Guest";
 
-  /* States */
+  /* ================= STATES ================= */
+
   const [connectionInfo, setConnectionInfo] =
     useState(null);
 
@@ -30,7 +32,8 @@ function VideoCall({ roomCode }) {
   const [showChat, setShowChat] =
     useState(false);
 
-  /* Fetch LiveKit Token */
+  /* ================= FETCH TOKEN ================= */
+
   useEffect(() => {
 
     let mounted = true;
@@ -84,10 +87,12 @@ function VideoCall({ roomCode }) {
 
   }, [roomCode, username]);
 
-  /* Error Screen */
+  /* ================= ERROR ================= */
+
   if (error) {
 
     return (
+
       <div
         style={{
           height: "100%",
@@ -104,14 +109,17 @@ function VideoCall({ roomCode }) {
       >
         ❌ {error}
       </div>
+
     );
 
   }
 
-  /* Loading */
+  /* ================= LOADING ================= */
+
   if (!connectionInfo) {
 
     return (
+
       <div
         style={{
           height: "100%",
@@ -126,7 +134,6 @@ function VideoCall({ roomCode }) {
         }}
       >
 
-        {/* Loader */}
         <div
           style={{
             width: "80px",
@@ -175,11 +182,15 @@ function VideoCall({ roomCode }) {
         </style>
 
       </div>
+
     );
 
   }
 
+  /* ================= MAIN UI ================= */
+
   return (
+
     <div
       style={{
         height: "100%",
@@ -192,7 +203,8 @@ function VideoCall({ roomCode }) {
       }}
     >
 
-      {/* Top Left */}
+      {/* ================= TOP LEFT ================= */}
+
       <div
         style={{
           position: "absolute",
@@ -234,7 +246,8 @@ function VideoCall({ roomCode }) {
 
       </div>
 
-      {/* Chat Button */}
+      {/* ================= CHAT BUTTON ================= */}
+
       <button
         onClick={() =>
           setShowChat(!showChat)
@@ -252,33 +265,47 @@ function VideoCall({ roomCode }) {
           color: "white",
           fontWeight: "800",
           fontSize: "16px",
-          cursor: "pointer"
+          cursor: "pointer",
+          boxShadow:
+            "0 10px 30px rgba(37,99,235,0.35)"
         }}
       >
         💬 Chat
       </button>
 
-      {/* LiveKit */}
+      {/* ================= LIVEKIT ROOM ================= */}
+
       <LiveKitRoom
+
         token={connectionInfo.token}
+
         serverUrl={connectionInfo.url}
+
         connect={true}
-        video={false}
-        audio={false}
+
+        video={true}
+
+        audio={true}
+
         data-lk-theme="default"
+
         style={{
           height: "100%",
           width: "100%"
         }}
+
       >
 
-        {/* Full Screen Video */}
+        {/* ================= VIDEO CONFERENCE ================= */}
+
         <VideoConference />
 
-        {/* Audio */}
+        {/* ================= AUDIO ================= */}
+
         <RoomAudioRenderer />
 
-        {/* Chat */}
+        {/* ================= CHAT PANEL ================= */}
+
         {
           showChat && (
 
@@ -296,7 +323,9 @@ function VideoCall({ roomCode }) {
                 border:
                   "1px solid rgba(255,255,255,0.08)",
                 zIndex: 1000,
-                backdropFilter: "blur(14px)"
+                backdropFilter: "blur(14px)",
+                boxShadow:
+                  "0 20px 50px rgba(0,0,0,0.45)"
               }}
             >
 
@@ -313,7 +342,16 @@ function VideoCall({ roomCode }) {
                 💬 Classroom Chat
               </div>
 
-              <Chat />
+              <div
+                style={{
+                  height:
+                    "calc(100% - 70px)"
+                }}
+              >
+
+                <Chat />
+
+              </div>
 
             </div>
 
@@ -323,6 +361,7 @@ function VideoCall({ roomCode }) {
       </LiveKitRoom>
 
     </div>
+
   );
 
 }
