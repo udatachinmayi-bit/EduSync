@@ -3,7 +3,6 @@ import { useParams, useNavigate } from "react-router-dom";
 
 import VideoCall from "../components/VideoCall";
 import Whiteboard from "../components/Whiteboard";
-import ChatBox from "../components/ChatBox";
 
 function Classroom() {
   const { roomCode } = useParams();
@@ -136,8 +135,7 @@ function Classroom() {
         {/* VIDEO SECTION */}
         <div
           style={{
-            flex:
-              showWhiteboard ? 2 : 3,
+            flex: showWhiteboard ? 2 : 1,
             height: "100%",
             borderRadius: "24px",
             overflow: "hidden",
@@ -148,24 +146,6 @@ function Classroom() {
           }}
         >
           <VideoCall
-            roomCode={roomCode}
-          />
-        </div>
-
-        {/* CHAT SECTION */}
-        <div
-          style={{
-            width: "350px",
-            height: "100%",
-            borderRadius: "24px",
-            overflow: "hidden",
-            border:
-              "1px solid rgba(255,255,255,0.08)",
-            boxShadow:
-              "0 20px 60px rgba(0,0,0,0.45)",
-          }}
-        >
-          <ChatBox
             roomCode={roomCode}
           />
         </div>
