@@ -16,8 +16,7 @@ function Whiteboard({ roomCode }) {
     console.log("📌 Joined Room:", roomCode);
 
     const handleWhiteboardData = (elements) => {
-      if (!excalidrawAPI.current || !elements)
-        return;
+      if (!excalidrawAPI.current || !elements) return;
 
       isRemoteUpdate.current = true;
 
@@ -101,14 +100,6 @@ function Whiteboard({ roomCode }) {
           excalidrawAPI.current = api;
         }}
         onChange={handleChange}
-        UIOptions={{
-          canvasActions: {
-            loadScene: false,
-            saveToActiveFile: false,
-            export: true,
-            clearCanvas: true,
-          },
-        }}
       />
     </div>
   );
