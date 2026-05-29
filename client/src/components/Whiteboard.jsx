@@ -2,52 +2,41 @@ import { useEffect, useRef } from "react";
 import { Excalidraw } from "@excalidraw/excalidraw";
 import "@excalidraw/excalidraw/index.css";
 
-import { io } from "socket.io-client";
-
-/* Production Socket Connection */
-const socket = io(
-  "https://edusync-backend.onrender.com",
-  {
-    transports: ["websocket"],
-    withCredentials: true,
-    reconnection: true,
-    reconnectionAttempts: 10,
-    reconnectionDelay: 1000
-  }
-);
+import socket from "../socket";
 
 function Whiteboard({ roomCode }) {
-
   const excalidrawAPI = useRef(null);
-
-  /* Prevent Infinite Sync Loop */
   const isRemoteUpdate = useRef(false);
 
   useEffect(() => {
-
     if (!roomCode) return;
 
-    /* Join Room */
     socket.emit("join-room", roomCode);
 
-    console.log("Joined Room:", roomCode);
+    console.log("📌 Joined Room:", roomCode);
 
-    /* Receive Whiteboard Data */
     const handleWhiteboardData = (elements) => {
+      if (!excalidrawAPI.current || !elements)
+        return;
 
-      if (
-        excalidrawAPI.current &&
-        elements
-      ) {
+      isRemoteUpdate.current = true;
 
-        isRemoteUpdate.current = true;
+      excalidrawAPI.current.updateScene({
+        elements,
+      });
+    };
 
-        excalidrawAPI.current.updateScene({
-          elements
-        });
+    const handleConnect = () => {
+      console.log(
+        "✅ Socket Connected:",
+        socket.id
+      );
+    };
 
-      }
-
+    const handleDisconnect = () => {
+      console.log(
+        "❌ Socket Disconnected"
+      );
     };
 
     socket.on(
@@ -55,78 +44,71 @@ function Whiteboard({ roomCode }) {
       handleWhiteboardData
     );
 
-    socket.on("connect", () => {
-      console.log(
-        "Socket Connected:",
-        socket.id
-      );
-    });
+    socket.on(
+      "connect",
+      handleConnect
+    );
 
-    socket.on("disconnect", () => {
-      console.log("Socket Disconnected");
-    });
+    socket.on(
+      "disconnect",
+      handleDisconnect
+    );
 
     return () => {
-
       socket.off(
         "whiteboard-data",
         handleWhiteboardData
       );
 
-    };
+      socket.off(
+        "connect",
+        handleConnect
+      );
 
+      socket.off(
+        "disconnect",
+        handleDisconnect
+      );
+    };
   }, [roomCode]);
 
-  /* Send Drawing Updates */
   const handleChange = (elements) => {
-
-    /* Ignore Remote Updates */
     if (isRemoteUpdate.current) {
-
       isRemoteUpdate.current = false;
       return;
-
     }
-
-    if (!elements) return;
 
     socket.emit("whiteboard-data", {
       roomCode,
-      elements
+      elements,
     });
-
   };
 
   return (
     <div
       style={{
-        height: "100%",
         width: "100%",
+        height: "100%",
+        borderRadius: "20px",
+        overflow: "hidden",
         background:
           "linear-gradient(135deg,#020617,#0f172a)",
-        borderRadius: "18px",
-        overflow: "hidden"
       }}
     >
       <Excalidraw
-
         theme="dark"
-
         excalidrawAPI={(api) => {
           excalidrawAPI.current = api;
         }}
-
         onChange={handleChange}
-
         UIOptions={{
           canvasActions: {
             loadScene: false,
             saveToActiveFile: false,
             export: true,
-            clearCanvas: true
-          }
+            clearCanvas: true,
+          },
         }}
-
       />
     </div>
   );
